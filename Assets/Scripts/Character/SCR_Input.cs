@@ -143,11 +143,11 @@ public class SCR_Input : MonoBehaviour
         targetDirection.Normalize();
         targetDirection *= -1;
 
-        playerRB.AddForce(targetDirection * (powerMultiplier * power * 50));
-    }
+        playerRB.AddForce(targetDirection * (powerMultiplier * power * 50), ForceMode.Force);
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(player.transform.position, 0.2f);
+        Debug.Log(jumpTrajectory.FlightTime());
+
+        if (jumpTrajectory.FlightTime() > 1.2)
+            StartCoroutine(jumpTrajectory.RotatePlayerDuringJump(TouchDelta.Value.x));
     }
 }

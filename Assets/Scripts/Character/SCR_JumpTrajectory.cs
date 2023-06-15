@@ -18,6 +18,8 @@ public class SCR_JumpTrajectory : MonoBehaviour
 
     [SerializeField] public LayerMask floorMask;
 
+    [SerializeField] private AnimationCurve spinCurve;
+
     float g;
    
     void Awake()
@@ -41,6 +43,7 @@ public class SCR_JumpTrajectory : MonoBehaviour
 
     private void Update()
     {
+        
     }
 
     public void RenderArc()
@@ -96,6 +99,38 @@ public class SCR_JumpTrajectory : MonoBehaviour
         float y = x * Mathf.Tan(radianAngle) - ((g * x * x) / (2 * velocity * velocity * Mathf.Cos(radianAngle) * Mathf.Cos(radianAngle)));
 
         return startPos + new Vector3(x, y);
+    }
+
+    public float FlightTime()
+    {
+        float flightTime = 0;
+
+        flightTime = (2 * (velocity * Mathf.Sin(Mathf.Deg2Rad * angle) - (g * 0))) / g;
+
+        return flightTime - 0.07f;
+    }
+
+    public IEnumerator RotatePlayerDuringJump(float touchDeltaX)
+    {
+        float currentTime = 0;
+        float flightTime = FlightTime();
+
+        while (currentTime < flightTime)
+        {
+            currentTime += Time.deltaTime;
+            Debug.Log(spinCurve.Evaluate(currentTime / flightTime));
+
+            if (touchDeltaX > 0)
+            {
+                transform.rotation = Quaternion.Euler(spinCurve.Evaluate((currentTime / flightTime)) * 360, -90, 0);
+            } 
+            else
+            {
+                transform.rotation = Quaternion.Euler(spinCurve.Evaluate(currentTime / flightTime) * 360, 90, 0);
+            }
+
+            yield return null;
+        }
     }
 
     private void OnDrawGizmos()

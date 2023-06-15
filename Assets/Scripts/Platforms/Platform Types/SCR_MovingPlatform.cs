@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SCR_MovingPlatform : MonoBehaviour
+public class SCR_MovingPlatform : SCR_BasePlatform
 {
     Vector3 startPos;
     Vector3 targetPos;
+
+    [SerializeField] AnimationCurve moveCurve;
 
     [SerializeField] float offset = 2f;
 
@@ -14,12 +16,21 @@ public class SCR_MovingPlatform : MonoBehaviour
     [SerializeField] Direction direction;
 
     [SerializeField] float speed = 1f;
+    [SerializeField] float startDelay = 0f;
+
+    float timer;
+
+    protected override void Awake()
+    {
+        platformType = eplatformType.Moving;
+        base.Awake(); 
+    }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            other.transform.parent = transform;
+            other.transform.SetParent(transform, true);
         }
     }
 
@@ -27,7 +38,7 @@ public class SCR_MovingPlatform : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            other.transform.parent = null;
+            other.transform.SetParent(null, true);
         }
     }
 
@@ -52,8 +63,14 @@ public class SCR_MovingPlatform : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        transform.position = Vector3.Lerp(startPos, targetPos, Mathf.PingPong(Time.time * speed, 1f));
+        timer += Time.fixedDeltaTime;
+
+        if (timer > startDelay)
+        {
+            transform.position = Vector3.Lerp(startPos, targetPos, moveCurve.Evaluate(Mathf.PingPong((timer - startDelay) * speed, 1)));
+        } 
+        
     }
 }
